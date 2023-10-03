@@ -136,7 +136,7 @@ class LibmgbaEmulator:
         `saves/` directory.
         """
         with open(self._current_save_path, 'rb') as save_file:
-            saves_directory = profile.path / 'saves'
+            saves_directory = self._profile.path / 'saves'
             if not saves_directory.exists():
                 saves_directory.mkdir()
             with open(saves_directory / time.strftime('%Y-%m-%d_%H-%M-%S.sav'), 'wb') as backup_file:

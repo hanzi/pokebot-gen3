@@ -22,8 +22,6 @@ jobs:
 
       - name: Create a ZIP file
         run: |
-          apt-get update
-          apt-get install -y --no-install-recommends zip
           zip -qq -r /tmp/pokebot-${GITHUB_REF#refs/*/}.zip .
 
       - name: Creates the GitHub release

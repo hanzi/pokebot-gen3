@@ -16,19 +16,19 @@ jobs:
       - name: Update version.py and remove unnecessary files
         run: |
           echo "pokebot_name = \"PokéBot\"" > modules/version.py
-          echo "pokebot_version = \"${{ github.ref }}\"" >> modules/version.py
+          echo "pokebot_version = \"${{ github.ref_name }}\"" >> modules/version.py
           rm -rf .git .github .gitattributes .gitignore pokebot.spec
           mv LICENSE LICENSE.txt
 
       - name: Create a ZIP file
         run: |
-          zip -qq -r /tmp/pokebot-${{ github.ref }}.zip .
+          zip -qq -r /tmp/pokebot-${{ github.ref_name }}.zip .
 
       - name: Creates the GitHub release
         uses: marvinpinto/action-automatic-releases@v1.2.1
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          automatic_release_tag: ${{ github.ref }}
+          automatic_release_tag: ${{ github.ref_name }}
           files: |
-            /tmp/pokebot-${{ github.ref }}.zip
+            /tmp/pokebot-${{ github.ref_name }}.zip

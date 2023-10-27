@@ -21,9 +21,10 @@ jobs:
           mv LICENSE LICENSE.txt
 
       - name: Create a ZIP file
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r /tmp/pokebot-${GITHUB_REF#refs/*/}.zip .
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends zip
+          zip -qq -r /tmp/pokebot-${GITHUB_REF#refs/*/}.zip .
 
       - name: Creates the GitHub release
         uses: marvinpinto/action-automatic-releases@v1.2.1

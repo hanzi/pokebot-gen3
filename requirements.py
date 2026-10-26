@@ -16,6 +16,7 @@ required_modules = [
     "numpy>=2.4,<2.6",
     "setuptools",
     "ruamel.yaml~=0.19.1",
+    "PyYAML~=6.0",
     "pypresence~=4.6",
     "obsws-python~=1.8",
     "discord-webhook~=1.4",
@@ -119,18 +120,40 @@ def update_requirements(ask_for_confirmation: bool = True) -> bool:
             return False
 
     # Run `pip install` on all required modules.
+    import os
     import subprocess
 
     pip_flags = ["--disable-pip-version-check", "--no-python-version-warning"]
     if not is_virtualenv():
         pip_flags.append("--user")
 
+    # If there is no PyYAML wheel for this Python version (which tends to be the case for
+    # new releases), pip builds it from source. By default, that tries to compile a C
+    # extension, which fails on Windows unless Visual C++ is installed. The pure-Python
+    # version is fast enough for us, so we skip the extension. This has no effect if a
+    # wheel is available.
+    pip_env = {**os.environ, "PYYAML_FORCE_LIBYAML": "0"}
+
     for module in required_modules:
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", *pip_flags, module],
             stderr=sys.stderr,
             stdout=sys.stdout,
+            env=pip_env,
         )
+
+    # Python only adds the user site-packages directory to `sys.path` at start-up, and only
+    # if it already exists. On a fresh Python installation, it has just been created by the
+    # `pip install --user` calls above, so none of the modules we installed would be
+    # importable until the next start.
+    if not is_virtualenv():
+        import importlib
+        import site
+
+        user_site_packages = site.getusersitepackages()
+        if os.path.isdir(user_site_packages) and user_site_packages not in sys.path:
+            site.addsitedir(user_site_packages)
+        importlib.invalidate_caches()
 
     # Make sure that `libmgba-py` is installed.
     print("")
